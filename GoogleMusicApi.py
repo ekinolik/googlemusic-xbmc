@@ -25,6 +25,11 @@ class GoogleMusicApi():
 
         return songs
 
+    def getFilterSongs(self, filter_type, filter_criteria):
+        songs = self.storage.getFilterSongs(filter_type, filter_criteria)
+
+        return songs
+
     def getPlaylistsByType(self, playlist_type, forceRenew=False):
         if forceRenew:
             self.updatePlaylists(playlist_type)
@@ -39,6 +44,10 @@ class GoogleMusicApi():
     def getSong(self, song_id):
         return self.storage.getSong(song_id)
 
+    def getCriteria(self, criteria):
+        return self.storage.getCriteria(criteria)
+        
+        
     def updatePlaylistSongs(self, playlist_id):
         api_songs = []
 
@@ -52,7 +61,7 @@ class GoogleMusicApi():
 
     def updatePlaylists(self, playlist_type):
         self.login.login()
-        playlists = self.gmusicapi.get_all_playlist_ids(playlist_type=="auto", playlist_type=="instant", playlist_type=="user", always_id_lists=True)
+        playlists = self.gmusicapi.get_all_playlist_ids(playlist_type=="auto", playlist_type=="user", always_id_lists=True)
         self.storage.storePlaylists(playlists[playlist_type], playlist_type)
 
     def getSongStreamUrl(self, song_id):
