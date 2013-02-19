@@ -4,14 +4,6 @@ from gmusicapi.api import Api
 
 class GoogleMusicApi():
     def __init__(self):
-        self.xbmc = sys.modules["__main__"].xbmc
-        self.xbmcgui = sys.modules["__main__"].xbmcgui
-        self.xbmcplugin = sys.modules["__main__"].xbmcplugin
-
-        self.settings = sys.modules["__main__"].settings
-        self.language = sys.modules["__main__"].language
-        self.dbg = sys.modules["__main__"].dbg
-        self.common = sys.modules["__main__"].common
         self.storage = sys.modules["__main__"].storage
 
         self.gmusicapi = Api()
@@ -52,9 +44,7 @@ class GoogleMusicApi():
 
     def updatePlaylists(self, playlist_type):
         self.login.login()
-        playlists = self.gmusicapi.get_all_playlist_ids(auto=True,
-                                                        user=True,
-                                                        always_id_lists=True)
+        playlists = self.gmusicapi.get_all_playlist_ids(playlist_type, always_id_lists=True)
         self.storage.storePlaylists(playlists[playlist_type], playlist_type)
 
     def getSongStreamUrl(self, song_id):
@@ -74,4 +64,3 @@ class GoogleMusicApi():
         
     def getSearch(self, query):
         return self.storage.getSearch(query)
-        

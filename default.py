@@ -1,18 +1,35 @@
 import sys, xbmc, xbmcgui, xbmcplugin, xbmcaddon, xbmcvfs
 
 # plugin constants
-version = "0.2.2"
+version = "0.5.0-ek"
 plugin = "GoogleMusic-" + version
 
 # xbmc hooks
 settings = xbmcaddon.Addon(id='plugin.audio.googlemusic')
-language = settings.getLocalizedString
+__info__ = settings.getAddonInfo
+__icon__ = __info__('icon')
+
 dbg = settings.getSetting( "debug" ) == "true"
 dbglevel = 3
 
 # plugin variables
 storage = ""
-common = ""
+
+# utility functions
+def parameters_string_to_dict(parameters):
+    ''' Convert parameters encoded in a URL to a dict. '''
+    paramDict = {}
+    if parameters:
+        paramPairs = parameters[1:].split("&")
+        for paramsPair in paramPairs:
+            paramSplits = paramsPair.split('=')
+            if (len(paramSplits)) == 2:
+                paramDict[paramSplits[0]] = paramSplits[1]
+    return paramDict
+
+def log(message):
+    if dbg:
+        print "[%s] %s" % (plugin,message)
 
 if (__name__ == "__main__" ):
     if dbg:
@@ -20,24 +37,38 @@ if (__name__ == "__main__" ):
     else:
         print plugin
 
-    import CommonFunctions
-    common = CommonFunctions
-    common.plugin = plugin
-
     import GoogleMusicStorage
     storage = GoogleMusicStorage.GoogleMusicStorage()
 
-    import GoogleMusicNavigation
-    navigation = GoogleMusicNavigation.GoogleMusicNavigation()
+    import GoogleMusicApi
+    api = GoogleMusicApi.GoogleMusicApi()
 
-    if (not sys.argv[2]):
-        navigation.listMenu()
+    import GoogleMusicPlaySong
+    song = GoogleMusicPlaySong.GoogleMusicPlaySong()
+        
+    params = parameters_string_to_dict(sys.argv[2])
+    get = params.get
+
+    if (get("action") == "play_song"):
+
+        song.play(get("song_id"))
+
     else:
-        params = common.getParameters(sys.argv[2])
-        get = params.get
-        if (get("action")):
+
+        import GoogleMusicNavigation
+        navigation = GoogleMusicNavigation.GoogleMusicNavigation()
+
+        import GoogleMusicLogin
+        GoogleMusicLogin.GoogleMusicLogin(None).checkCookie()
+
+        storage.checkDbInit()
+
+        if (not params):
+           navigation.listMenu()
+        elif (get("action")):
             navigation.executeAction(params)
         elif (get("path")):
             navigation.listMenu(params)
         else:
             print plugin + " ARGV Nothing done.. verify params " + repr(params)
+
